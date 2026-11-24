@@ -3,9 +3,8 @@ minimumReleaseAgeStrict: true
 minimumReleaseAgeIgnoreMissingTime: false
 minimumReleaseAgeExclude:
   - 'yamb'
-  - 'yamb-*'
-  - '@meritt/yamb-*'
-  - microtypo
+  - 'yamb-storage-mongo'
+  - 'yamb-storage-sqlite'
   - oxfmt
   - oxlint
   - '@oxfmt/*'
