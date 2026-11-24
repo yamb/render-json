@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 
-import { json } from '@meritt/yamb-render-json';
 import { MongoClient, ObjectId } from 'mongodb';
 import { yamb } from 'yamb';
+import { json } from 'yamb-render-json';
 
 import { mongodb, test as mongoTest, uri, dbName } from './prepared-mongodb.js';
 import { sqlite, test as sqliteTest, path } from './prepared-sqlite.js';
