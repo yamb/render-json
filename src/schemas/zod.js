@@ -12,6 +12,22 @@ import {
   UriSchema
 } from '#core/schemas';
 
+function isHttpUrl(value) {
+  // oxlint-disable-next-line no-control-regex
+  if (/[\\\x00-\x20\x7f]/u.test(value) || !/^https?:\/\//i.test(value)) {
+    return false;
+  }
+
+  const url = URL.parse(value);
+
+  return url !== null && !url.username && !url.password;
+}
+
+const HttpUrlSchema = z
+  .string()
+  .trim()
+  .refine(isHttpUrl, 'must be an absolute HTTP(S) URL without credentials');
+
 export const ConfigSchema = z.strictObject({
   text: z.boolean().default(true),
   related: z
@@ -29,8 +45,8 @@ const LanguageSchema = z.string().refine((value) => {
 
 export const FeedConfigSchema = z.strictObject({
   title: z.string().refine((value) => value.trim().length > 0, 'must not be empty'),
-  feed: z.httpUrl(),
-  link: z.httpUrl().optional(),
+  feed: HttpUrlSchema,
+  link: HttpUrlSchema.optional(),
   description: z.string().optional(),
   language: LanguageSchema.optional(),
   author: AuthorSchema.optional(),
@@ -63,13 +79,7 @@ const PreparedCoverSchema = z.strictObject({
         return URL.canParse(value, 'https://example.invalid/');
       }
 
-      if (!/^https?:\/\//i.test(value)) {
-        return false;
-      }
-
-      const parsed = URL.parse(value);
-
-      return Boolean(parsed) && !parsed.username && !parsed.password;
+      return isHttpUrl(value);
     }, 'invalid prepared cover URL')
     .optional()
 });
