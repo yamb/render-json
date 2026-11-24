@@ -1,4 +1,4 @@
-# @meritt/yamb-render-json
+# yamb-render-json
 
 [![npm version][npm-image]][npm-url] [![Build status][github-actions-image]][github-actions-url] [![Coverage status][coveralls-image]][coveralls-url] [![Dependency status][libraries-image]][libraries-url]
 
@@ -11,11 +11,11 @@ For GitHub Packages, route the `@yamb` scope to `https://npm.pkg.github.com` and
 Requires Node.js 26.13 or later and `yamb`. Direct rendering needs no storage.
 
 ```bash
-pnpm add yamb @meritt/yamb-render-json
+pnpm add yamb yamb-render-json
 ```
 
 ```js
-import { feed, json } from '@meritt/yamb-render-json';
+import { feed, json } from 'yamb-render-json';
 
 const source = {
   id: 'hello',
@@ -79,11 +79,11 @@ console.log(JSON.stringify(result));
 
 MIT. See `LICENSE`.
 
-[npm-image]: https://img.shields.io/npm/v/@meritt/yamb-render-json?style=flat
-[npm-url]: https://www.npmjs.com/package/@meritt/yamb-render-json
+[npm-image]: https://img.shields.io/npm/v/yamb-render-json?style=flat
+[npm-url]: https://www.npmjs.com/package/yamb-render-json
 [github-actions-image]: https://github.com/yamb/render-json/actions/workflows/ci.yml/badge.svg
 [github-actions-url]: https://github.com/yamb/render-json/actions/workflows/ci.yml
 [coveralls-image]: https://coveralls.io/repos/github/yamb/render-json/badge.svg
 [coveralls-url]: https://coveralls.io/github/yamb/render-json
-[libraries-image]: https://img.shields.io/librariesio/release/npm/%40meritt%2Fyamb-render-json?style=flat
-[libraries-url]: https://libraries.io/npm/%40meritt%2Fyamb-render-json
+[libraries-image]: https://img.shields.io/librariesio/release/npm/yamb-render-json?style=flat
+[libraries-url]: https://libraries.io/npm/yamb-render-json

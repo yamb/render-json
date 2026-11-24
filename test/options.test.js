@@ -8,7 +8,7 @@ test('JSON export owns empty options independently', async (t) => {
   t.after(() => blog.close());
 
   const post = await blog.create({ title: 'Options' });
-  const { json } = await import('@meritt/yamb-render-json');
+  const { json } = await import('yamb-render-json');
   const result = await json().collection(
     { posts: [post.toJSON()], view: 'full' },
     {

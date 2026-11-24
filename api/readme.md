@@ -60,16 +60,16 @@ Cover references resolve against the canonical article URL with native URL seman
 
 ### Prepared content
 
-Install `@meritt/yamb-markdown` and `@meritt/yamb-microtypo` for the standard pipeline:
+Install `yamb-markdown` and `yamb-microtypo` for the standard pipeline:
 
 ```bash
-pnpm add @meritt/yamb-markdown @meritt/yamb-microtypo
+pnpm add yamb-markdown yamb-microtypo
 ```
 
 ```js
-import { markdown } from '@meritt/yamb-markdown';
-import { microtypo } from '@meritt/yamb-microtypo';
-import { feed } from '@meritt/yamb-render-json';
+import { markdown } from 'yamb-markdown';
+import { microtypo } from 'yamb-microtypo';
+import { feed } from 'yamb-render-json';
 import { prepare } from 'yamb/transform';
 
 await using md = markdown();
@@ -118,7 +118,7 @@ Pass `{ signal }` as the final render option, or provide `ctx.signal` for direct
 
 | Code | Cause |
 | --- | --- |
-| `YAMB_JSON_RENDERER_CONFIG` | Invalid configuration for either factory; `JsonRendererConfigError` is exported from `@meritt/yamb-render-json/errors` |
+| `YAMB_JSON_RENDERER_CONFIG` | Invalid configuration for either factory; `JsonRendererConfigError` is exported from `yamb-render-json/errors` |
 | `YAMB_RENDERER_INPUT` | Missing/noniterable collection source; invalid source URI/text/cover; unsuitable/duplicate feed post, prepared projection or output overflow |
 | `YAMB_RENDERER_FAILED` | Full related expansion exceeds its limits, or an unexpected failure is wrapped with `cause` by feed/core rendering |
 | `YAMB_RENDERER_SCOPE` | Core dispatch selects an unsupported scope, such as a single post for `feed()` |
