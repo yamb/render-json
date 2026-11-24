@@ -582,6 +582,28 @@ for (const patch of [{ cover: { url: '//[' } }, { author: { name: 'A', url: '//[
   });
 }
 
+test('JSON Feed accepts feed and link URLs on any host', () => {
+  for (const url of [
+    'http://localhost:3000/feed',
+    'http://127.0.0.1:3004/feed',
+    'http://[::1]/feed',
+    'http://intranet/feed'
+  ]) {
+    assert.doesNotThrow(() => renderers.feed({ ...config, feed: url, link: url }), url);
+  }
+});
+
+test('JSON Feed rejects feed and link URLs with credentials', () => {
+  for (const options of [
+    { feed: 'https://user:pass@example.com/feed.json' },
+    { link: 'https://user@example.com/' }
+  ]) {
+    assert.throws(() => renderers.feed({ ...config, ...options }), {
+      code: 'YAMB_JSON_RENDERER_CONFIG'
+    });
+  }
+});
+
 test('JSON Feed rejects malformed configured author URL at construction', () => {
   assert.throws(() => renderers.feed({ ...config, author: { name: 'A', url: '//[' } }), {
     code: 'YAMB_JSON_RENDERER_CONFIG'

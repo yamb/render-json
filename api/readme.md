@@ -37,8 +37,8 @@ Register `feed(config)` as `renderers.feed` and call `blog.render('feed', { post
 | Setting | Default | Value |
 | --- | --- | --- |
 | `title` | Required | Nonempty feed title |
-| `feed` | Required | Absolute HTTP(S) feed URL |
-| `link` | `ctx.base` | Absolute HTTP(S) home page URL |
+| `feed` | Required | Absolute HTTP(S) feed URL without credentials |
+| `link` | `ctx.base` | Absolute HTTP(S) home page URL without credentials |
 | `description` | Absent | Plain text |
 | `language` | Absent | Locale accepted by native `Intl.getCanonicalLocales`, e.g. `en-US` |
 | `author` | Absent | Core author object; feed-level author |
