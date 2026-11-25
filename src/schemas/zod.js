@@ -30,9 +30,7 @@ const HttpUrlSchema = z
 
 export const ConfigSchema = z.strictObject({
   text: z.boolean().default(true),
-  related: z
-    .union([z.literal('uri'), z.literal('summary'), z.literal('full'), z.literal(false)])
-    .default('uri')
+  related: z.literal(['uri', 'summary', 'full', false]).default('uri')
 });
 
 const LanguageSchema = z.string().refine((value) => {

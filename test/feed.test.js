@@ -301,6 +301,14 @@ test('JSON Feed rejects duplicate IDs and invalid sources', async (t) => {
   for (const input of [undefined, {}, { posts: null }, { posts: 1 }]) {
     await assert.rejects(() => blog.render('feed', input), { code: 'YAMB_RENDERER_INPUT' });
   }
+
+  const renderer = renderers.feed(config);
+
+  for (const input of [undefined, {}, { posts: 1 }, { posts: [null] }, { posts: ['post'] }]) {
+    await assert.rejects(() => renderer.collection(input, { base: new URL('https://e.com') }), {
+      code: 'YAMB_RENDERER_INPUT'
+    });
+  }
 });
 
 for (const content of [

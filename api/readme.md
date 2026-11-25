@@ -9,7 +9,7 @@ Both renderers return independent objects for `JSON.stringify()`. See the [quick
 
 ## Source JSON
 
-Register `json()` as `renderers.json`. Use `post.render('json')` for a full post and `blog.render('json', { posts: blog.published, view: 'full' })` for full collection items. Collections default to summaries. Direct calls take canonical source URIs, `ctx.base` as a URL and `ctx.timeZone`. Related lookups also need `ctx.yamb`.
+Register `json()` as `renderers.json`. Use `post.render('json')` for a full post and `blog.render('json', { posts: blog.published, view: 'full' })` for full collection items. Collections default to summaries; `view` accepts only `'summary'` or `'full'`. Direct calls take canonical source URIs, `ctx.base` as a URL and `ctx.timeZone`. Related lookups also need `ctx.yamb`.
 
 | Setting | Default | Effect |
 | --- | --- | --- |
@@ -24,7 +24,7 @@ Unknown factory settings fail. JSON never invokes content preparation. `text` is
 | Full | Summary fields plus `slug`, `cover`, `author`, `links: { related }`, `meta`, `social`, `status`, `options`; configured `text` / `related`; `createdAt` / `updatedAt` when present |
 | Related summary | `uri`, absolute `url`, `title`; `publishedAt` / `publishedDate` when present |
 
-Absent preview becomes `''`; absent tags become `[]`; full views default cover/author/meta/social to `{}` and enabled text to `''`. Minimal direct input leaves absent slug/status/options as `undefined`, so `JSON.stringify()` omits them. Dates are ISO strings; `publishedDate` is the calendar date in `ctx.timeZone`. Source views omit stable `id`; read it from Post/PostData when needed.
+Absent preview becomes `''`; absent tags become `[]`; full views default cover/author/meta/social to `{}` and enabled text to `''`. Minimal direct input leaves absent slug/status/options as `undefined`, so `JSON.stringify()` omits them. Source dates may be ISO strings or `Temporal.Instant` values within core's instant range; views emit ISO strings, and `publishedDate` is the calendar date in `ctx.timeZone`. Source views omit stable `id`; read it from Post/PostData when needed.
 
 Full views capture the whole source record before the first related lookup await; mutable output does not alias input. Summaries copy only their selected fields, including tags. Collections capture each item as it arrives and accumulate every selected result; bound large inputs with collection selection or `take(n)`. There is no transaction across collection items or related lookups.
 
@@ -119,7 +119,7 @@ Pass `{ signal }` as the final render option, or provide `ctx.signal` for direct
 | Code | Cause |
 | --- | --- |
 | `YAMB_JSON_RENDERER_CONFIG` | Invalid configuration for either factory; `JsonRendererConfigError` is exported from `yamb-render-json/errors` |
-| `YAMB_RENDERER_INPUT` | Missing/noniterable collection source; invalid source URI/text/cover; unsuitable/duplicate feed post, prepared projection or output overflow |
+| `YAMB_RENDERER_INPUT` | Missing/noniterable collection source; unknown collection view; invalid source URI/text/cover/links/date; unsuitable/duplicate feed post, prepared projection or output overflow |
 | `YAMB_RENDERER_FAILED` | Full related expansion exceeds its limits, or an unexpected failure is wrapped with `cause` by feed/core rendering |
 | `YAMB_RENDERER_SCOPE` | Core dispatch selects an unsupported scope, such as a single post for `feed()` |
 

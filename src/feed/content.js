@@ -2,16 +2,7 @@ import { RendererInputError } from '#core/errors';
 import { url } from '#core/url';
 
 import { FeedPostSchema, PreparedSchema } from '../schemas/zod.js';
-
-function parse(schema, value, message) {
-  const result = schema.safeParse(value);
-
-  if (!result.success) {
-    throw new RendererInputError(message, { details: { issues: result.error.issues } });
-  }
-
-  return result.data;
-}
+import { clone, parse } from '../source.js';
 
 function escape(value) {
   return value
@@ -33,7 +24,7 @@ function literal(title, { text, preview, cover }) {
 }
 
 export async function content(value, config, ctx) {
-  const source = structuredClone(value);
+  const source = clone(value);
   const post = parse(FeedPostSchema, source, 'feed requires saved published posts');
 
   const prepared = config.prepare

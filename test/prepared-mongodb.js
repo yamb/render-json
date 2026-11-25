@@ -36,33 +36,31 @@ export function test(name, fn) {
     }
 
     assert.match(dbName, /^yamb_test_/);
-    const client = new MongoClient(uri, { retryWrites: false, serverSelectionTimeoutMS: 3000 });
+    await using client = new MongoClient(uri, {
+      retryWrites: false,
+      serverSelectionTimeoutMS: 3000
+    });
+    await client.connect();
+    const db = client.db(dbName);
+    const collections = await db.listCollections({ name: 'posts' }, { nameOnly: true }).toArray();
+    assert.equal(collections.length, 1, 'prepared Mongo posts collection must exist');
+
+    const collection = db.collection('posts');
+    assert.equal(await collection.countDocuments({}), 0, 'prepared Mongo must be empty');
 
     try {
-      await client.connect();
-      const db = client.db(dbName);
-      const collections = await db.listCollections({ name: 'posts' }, { nameOnly: true }).toArray();
-      assert.equal(collections.length, 1, 'prepared Mongo posts collection must exist');
-
-      const collection = db.collection('posts');
-      assert.equal(await collection.countDocuments({}), 0, 'prepared Mongo must be empty');
-
-      try {
-        await fn(t);
-      } finally {
-        for (const storage of storages) {
-          await storage.close();
-        }
-
-        storages.clear();
-
-        if (owned.size) {
-          await collection.deleteMany({ _id: { $in: [...owned].map((id) => new ObjectId(id)) } });
-          owned.clear();
-        }
-      }
+      await fn(t);
     } finally {
-      await client.close();
+      for (const storage of storages) {
+        await storage.close();
+      }
+
+      storages.clear();
+
+      if (owned.size) {
+        await collection.deleteMany({ _id: { $in: [...owned].map((id) => new ObjectId(id)) } });
+        owned.clear();
+      }
     }
   });
 }

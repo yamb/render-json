@@ -1,12 +1,20 @@
 import { z } from 'zod';
 
+import { AsyncIteratorHelper } from '#core/async-iterator';
+import { RendererInputError } from '#core/errors';
+
 import pkg from '../../package.json' with { type: 'json' };
 import { JsonRendererConfigError } from '../errors/index.js';
 import { ConfigSchema } from '../schemas/zod.js';
-import { setState } from './internal.js';
-import methods from './methods.js';
+import { inputPosts, snapshotSource, validateSource } from '../source.js';
+import { buildFullView } from '../views/post-full.js';
+import { buildSummaryView } from '../views/post-summary.js';
+
+const views = new Set([undefined, 'summary', 'full']);
 
 export class JsonRenderer {
+  #config;
+
   constructor(config = {}) {
     const result = ConfigSchema.safeParse(config);
 
@@ -18,19 +26,34 @@ export class JsonRenderer {
 
     this.name = 'json';
     this.version = pkg.version;
-    setState(this, { config: result.data });
+    this.#config = result.data;
   }
 
-  static {
-    for (const method of methods) {
-      Object.defineProperty(this.prototype, method.name, {
-        value(...args) {
-          return method.fn(this, ...args);
-        },
-        writable: false,
-        configurable: false,
-        enumerable: false
-      });
+  async post(post, ctx) {
+    ctx.signal?.throwIfAborted();
+
+    return buildFullView(snapshotSource(post), ctx, this.#config);
+  }
+
+  async collection(input, ctx) {
+    const posts = inputPosts(input);
+
+    if (!views.has(input.view)) {
+      throw new RendererInputError("input.view must be 'summary' or 'full'");
     }
+
+    ctx.signal?.throwIfAborted();
+    const out = [];
+
+    for await (const post of AsyncIteratorHelper.from(posts, { signal: ctx.signal })) {
+      ctx.signal?.throwIfAborted();
+      out.push(
+        input.view === 'full'
+          ? await buildFullView(snapshotSource(post), ctx, this.#config)
+          : buildSummaryView(validateSource(post), ctx)
+      );
+    }
+
+    return { posts: out };
   }
 }

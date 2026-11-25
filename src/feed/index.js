@@ -7,6 +7,7 @@ import { url } from '#core/url';
 import pkg from '../../package.json' with { type: 'json' };
 import { JsonRendererConfigError } from '../errors/index.js';
 import { FeedConfigSchema } from '../schemas/zod.js';
+import { inputPosts } from '../source.js';
 import { budget } from './budget.js';
 import { content, full } from './content.js';
 
@@ -28,10 +29,9 @@ function item(post, prepared, documentURL, base) {
     url: documentURL,
     title: prepared.title,
     date_published: post.publishedAt.toString(precision),
-    date_modified: post.updatedAt.toString(precision)
+    date_modified: post.updatedAt.toString(precision),
+    content_html: full(prepared)
   };
-
-  out.content_html = full(prepared);
 
   if (prepared.preview !== undefined) {
     out.summary = prepared.preview.plain;
@@ -72,16 +72,7 @@ export class FeedRenderer {
   async collection(input, ctx) {
     try {
       ctx.signal?.throwIfAborted();
-      const posts = input?.posts;
-
-      if (
-        !posts ||
-        (typeof posts[Symbol.asyncIterator] !== 'function' &&
-          typeof posts[Symbol.iterator] !== 'function')
-      ) {
-        throw new RendererInputError('input.posts must be iterable or async iterable');
-      }
-
+      const posts = inputPosts(input);
       const config = this.#config;
       const base = url('./', ctx.base);
       const out = {
@@ -105,7 +96,6 @@ export class FeedRenderer {
       }
 
       const bytes = budget(config.bytes);
-      bytes.check(config.title.length + (config.description?.length ?? 0));
       bytes.add(out);
 
       const ids = new Set();

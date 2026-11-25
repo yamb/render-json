@@ -1,6 +1,6 @@
 {
   "name": "yamb-render-json",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "JSON views and JSON Feed 1.1 for Yamb posts and collections",
   "keywords": [
     "blog",

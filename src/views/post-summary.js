@@ -1,8 +1,18 @@
 import { url } from '#core/url';
 
-export function buildSummaryView(post, ctx) {
-  ctx.signal?.throwIfAborted();
+export function publication(view, post, timeZone) {
+  if (post.publishedAt) {
+    view.publishedAt = String(post.publishedAt);
+    view.publishedDate = Temporal.Instant.from(post.publishedAt)
+      .toZonedDateTimeISO(timeZone)
+      .toPlainDate()
+      .toString();
+  }
 
+  return view;
+}
+
+export function buildSummaryView(post, ctx) {
   const view = {
     uri: post.uri,
     url: url(post.uri, ctx.base).href,
@@ -11,13 +21,5 @@ export function buildSummaryView(post, ctx) {
     tags: [...(post.tags ?? [])]
   };
 
-  if (post.publishedAt) {
-    view.publishedAt = post.publishedAt.toString();
-    view.publishedDate = Temporal.Instant.from(post.publishedAt)
-      .toZonedDateTimeISO(ctx.timeZone)
-      .toPlainDate()
-      .toString();
-  }
-
-  return view;
+  return publication(view, post, ctx.timeZone);
 }

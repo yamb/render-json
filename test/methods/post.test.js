@@ -2,10 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { isDeepStrictEqual } from 'node:util';
 
-import { Post } from 'yamb';
-
 import { JsonRenderer, json } from '../../src/index.js';
-import { buildFullView } from '../../src/views/post-full.js';
 import { blogWith, postData } from '../fixture.js';
 
 const CLOCK = () => Temporal.Instant.from('2026-04-26T12:00:00Z');
@@ -144,40 +141,21 @@ test('renderer does not mutate Post', async () => {
 });
 
 test('post with undefined publishedAt omits publishedAt and publishedDate', async () => {
-  const fakePost = new Post(
-    { timeZone: 'Europe/Moscow', base: 'https://nko.io' },
-    {
-      uri: null,
-      slug: 'pending',
-      title: 'Pending',
-      preview: '',
-      text: 'wip',
-      cover: {},
-      tags: [],
-      author: { name: 'A' },
-      links: { related: [] },
-      meta: {},
-      social: {},
-      status: 'draft',
-      createdAt: Temporal.Instant.from('2026-04-26T10:00:00Z'),
-      updatedAt: Temporal.Instant.from('2026-04-26T10:00:00Z'),
-      publishedAt: undefined,
-      options: {}
-    },
-    { pristine: false }
-  );
-
-  const ctx = {
-    yamb: {},
-    format: 'json',
-    scope: 'post',
-    timeZone: 'Europe/Moscow',
-    base: new URL('https://nko.io')
+  const draft = {
+    uri: 'drafts/pending',
+    slug: 'pending',
+    title: 'Pending',
+    text: 'wip',
+    links: { related: [] },
+    status: 'draft',
+    createdAt: '2026-04-26T10:00:00Z',
+    updatedAt: '2026-04-26T10:00:00Z',
+    publishedAt: undefined
   };
 
-  const out = await buildFullView(fakePost.toJSON(), ctx, {
-    text: true,
-    related: 'uri'
+  const out = await json().post(draft, {
+    timeZone: 'Europe/Moscow',
+    base: new URL('https://nko.io')
   });
 
   assert.equal('publishedAt' in out, false);
@@ -384,18 +362,6 @@ test('JSON cover views own complete, partial and empty objects', async () => {
 
     assert.equal(source.cover?.caption, caption);
     assert.notStrictEqual(view.cover, source.cover);
-  }
-});
-
-test('direct JSON rendering rejects invalid cover data', async () => {
-  const renderer = json();
-  const ctx = { base: new URL('https://example.com/'), timeZone: 'UTC' };
-
-  for (const cover of ['/cover.jpg', null, [], { unknown: true }, { url: '//example.com/a' }]) {
-    await assert.rejects(
-      () => renderer.post({ title: 'Cover', uri: 'drafts/cover', text: '', cover }, ctx),
-      { code: 'YAMB_RENDERER_INPUT' }
-    );
   }
 });
 
@@ -612,24 +578,67 @@ test('minimal ordinary full source retains defaults and text: false', async () =
   }
 });
 
-test('ordinary full views reject non-string and oversized text before lookup', async (t) => {
-  const renderer = new JsonRenderer();
+test('direct full views accept Temporal.Instant source dates', async () => {
+  const renderer = json();
+  const ctx = { base: new URL('https://example.test/blog'), timeZone: 'Europe/Moscow' };
+  const created = Temporal.Instant.from('2026-11-01T10:00:00Z');
+  const published = Temporal.Instant.from('2026-11-01T23:30:00Z');
+  const source = {
+    ...postData(0),
+    uri: '2026/11/instant',
+    createdAt: created,
+    updatedAt: created,
+    publishedAt: published
+  };
+
+  const post = await renderer.post(source, ctx);
+  const full = await renderer.collection({ posts: [source], view: 'full' }, ctx);
+  const summary = await renderer.collection({ posts: [source] }, ctx);
+
+  for (const view of [post, full.posts[0], summary.posts[0]]) {
+    assert.equal(view.publishedAt, '2026-11-01T23:30:00Z');
+    assert.equal(view.publishedDate, '2026-11-02');
+  }
+
+  for (const view of [post, full.posts[0]]) {
+    assert.equal(view.createdAt, '2026-11-01T10:00:00Z');
+    assert.equal(view.updatedAt, '2026-11-01T10:00:00Z');
+  }
+});
+
+test('ordinary views reject invalid text, cover, links and dates before lookup', async (t) => {
+  const renderer = new JsonRenderer({ related: 'full' });
   const blog = await blogWith([], { renderers: { json: renderer } });
   t.after(() => blog.close());
-  blog.storage.find = () => assert.fail('invalid text reached related lookup');
+  blog.storage.find = () => assert.fail('invalid source reached related lookup');
   const ctx = { yamb: blog, base: new URL('https://example.test/blog'), timeZone: 'UTC' };
 
-  for (const text of [{ nested: { value: 1 } }, null, 42, 'x'.repeat(1048577)]) {
+  for (const patch of [
+    ...[{ nested: { value: 1 } }, null, 42, 'x'.repeat(1048577)].map((text) => ({ text })),
+    ...['/cover.jpg', null, [], { unknown: true }, { url: '//example.com/a' }].map((cover) => ({
+      cover
+    })),
+    { links: { related: 'target' } },
+    { links: { related: Array.from({ length: 51 }, () => 'target') } },
+    { createdAt: 'nope' },
+    { updatedAt: '2026-13-01T00:00:00Z' },
+    { publishedAt: 'bad' },
+    { publishedAt: '0000-01-01T00:00:00Z' }
+  ]) {
     const source = {
       uri: 'drafts/source',
-      title: 'Invalid text',
-      text,
-      links: { related: ['target'] }
+      title: 'Invalid source',
+      links: { related: ['target'] },
+      ...patch
     };
 
+    const scopes = Object.hasOwn(patch, 'publishedAt')
+      ? ['post', 'full', 'summary']
+      : ['post', 'full'];
+
     for (const api of ['direct', 'blog']) {
-      for (const scope of ['post', 'collection']) {
-        const input = scope === 'post' ? { post: source } : { posts: [source], view: 'full' };
+      for (const scope of scopes) {
+        const input = scope === 'post' ? { post: source } : { posts: [source], view: scope };
         const direct =
           scope === 'post'
             ? () => renderer.post(source, ctx)
