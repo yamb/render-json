@@ -202,14 +202,14 @@ importers:
         specifier: 1.95.0
         version: 1.95.0
       yamb:
-        specifier: 1.0.3
-        version: 1.0.3
+        specifier: 1.1.0
+        version: 1.1.0
       yamb-storage-mongo:
-        specifier: 0.1.2
-        version: 0.1.2(yamb@1.0.3)
+        specifier: 0.2.0
+        version: 0.2.0(yamb@1.1.0)
       yamb-storage-sqlite:
-        specifier: 0.1.1
-        version: 0.1.1(yamb@1.0.3)
+        specifier: 0.2.0
+        version: 0.2.0(yamb@1.1.0)
 
 packages:
 
@@ -688,20 +688,20 @@ packages:
     resolution: {integrity: sha512-2ytDk0kiEj/yu90JOAp44PVPUkO9+jVhyf+SybKlRHSDlvOOZhdPIrr7xTH64l4WixO2cP+wQIcgujkGBPPz6g==}
     engines: {node: '>=20'}
 
-  yamb-storage-mongo@0.1.2:
-    resolution: {integrity: sha512-B6l0kqFYcz/a8D/xweflbfqZu3v401jwlqYpLJypX5Gxyu38aeEvfCS9951/BhQV5GGvI2ho2XCHrqXwkqaVZg==}
+  yamb-storage-mongo@0.2.0:
+    resolution: {integrity: sha512-/XDO27hp2UkyvX2BW/GV2zyvWhSt30oOXWjyx/bAt8tOYhui4vuoVuRKNtSCtcaypTrPyxI5WnpForZyR8Mwew==}
     engines: {node: '>=26.13.0'}
     peerDependencies:
-      yamb: ^1.0.0
+      yamb: ^1.1.0
 
-  yamb-storage-sqlite@0.1.1:
-    resolution: {integrity: sha512-G/1qY0FHjnUFBZaLus/vPNk8v0OBadep7mfwgKU3riNroolxm3G1tuX7xrT8W2CI6taxQwbX9E+xJae99g35Ew==}
+  yamb-storage-sqlite@0.2.0:
+    resolution: {integrity: sha512-JUH3orQrt+cQBInL9kec8vV21ORCIx3gZ1YvRi7MkuAetkojbMpDw0f+KF7PK6yG5vd5pXK7DzrvYJxOclowFA==}
     engines: {node: '>=26.13.0'}
     peerDependencies:
-      yamb: ^1.0.0
+      yamb: ^1.1.0
 
-  yamb@1.0.3:
-    resolution: {integrity: sha512-CD6q13DzvAW45ZkWqc6YmscYdTRvOs6wysJnFh+TQtWkYvOyn6uM9ZNm/orDF1obiPfSlXYJZkGWCmAZJN8uWQ==}
+  yamb@1.1.0:
+    resolution: {integrity: sha512-yhlXOHSy8bAzwIIhxb4akg3pXj3aSGHFGd4j2/L9tmpfvvIgiObSRGKxYJVg/PZ5GMTlKEFyKuOyqGJchRl4IQ==}
     engines: {node: '>=26.13.0'}
 
   zod@4.6.7:
@@ -915,10 +915,10 @@ snapshots:
       tr46: 6.0.0
       webidl-conversions: 8.0.1
 
-  yamb-storage-mongo@0.1.2(yamb@1.0.3):
+  yamb-storage-mongo@0.2.0(yamb@1.1.0):
     dependencies:
       mongodb: 7.9.1
-      yamb: 1.0.3
+      yamb: 1.1.0
       zod: 4.6.7
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
@@ -929,12 +929,12 @@ snapshots:
       - snappy
       - socks
 
-  yamb-storage-sqlite@0.1.1(yamb@1.0.3):
+  yamb-storage-sqlite@0.2.0(yamb@1.1.0):
     dependencies:
-      yamb: 1.0.3
+      yamb: 1.1.0
       zod: 4.6.7
 
-  yamb@1.0.3:
+  yamb@1.1.0:
     dependencies:
       zod: 4.6.7
 

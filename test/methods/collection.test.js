@@ -172,7 +172,40 @@ test('missing input.posts throws YAMB_RENDERER_INPUT', async () => {
       () => blog.render('json', { posts: undefined }),
       (err) => err?.code === 'YAMB_RENDERER_INPUT'
     );
+
+    for (const input of [undefined, {}, { posts: null }, { posts: 1 }, { posts: [null] }]) {
+      await assert.rejects(() => json().collection(input, { timeZone: 'UTC' }), {
+        code: 'YAMB_RENDERER_INPUT'
+      });
+    }
   });
+});
+
+test('unknown view throws YAMB_RENDERER_INPUT before the source starts', async (t) => {
+  const renderer = json();
+  const blog = await blogWith([], { renderers: { json: renderer } });
+  t.after(() => blog.close());
+  const ctx = { base: new URL('https://example.test/blog'), timeZone: 'UTC' };
+  const posts = {
+    [Symbol.iterator]() {
+      assert.fail('source started');
+    }
+  };
+
+  for (const view of ['Full', 'summaries', null, 1]) {
+    const input = { posts, view };
+
+    await assert.rejects(() => renderer.collection(input, ctx), { code: 'YAMB_RENDERER_INPUT' });
+    await assert.rejects(() => blog.render('json', input), { code: 'YAMB_RENDERER_INPUT' });
+  }
+
+  for (const view of [undefined, 'summary']) {
+    const result = await renderer.collection(
+      { posts: [{ uri: 'drafts/a', title: 'A' }], view },
+      ctx
+    );
+    assert.equal(Object.hasOwn(result.posts[0], 'slug'), false);
+  }
 });
 
 test('pre-aborted signal throws AbortError before first iteration', async () => {

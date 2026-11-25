@@ -1,6 +1,6 @@
 {
   "name": "yamb-render-json",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "JSON views and JSON Feed 1.1 for Yamb posts and collections",
   "keywords": [
     "blog",
@@ -50,12 +50,12 @@
     "mongodb": "7.9.1",
     "oxfmt": "0.80.0",
     "oxlint": "1.95.0",
-    "yamb": "1.0.3",
-    "yamb-storage-mongo": "0.1.2",
-    "yamb-storage-sqlite": "0.1.1"
+    "yamb": "1.1.0",
+    "yamb-storage-mongo": "0.2.0",
+    "yamb-storage-sqlite": "0.2.0"
   },
   "peerDependencies": {
-    "yamb": "^1.0.0"
+    "yamb": "^1.1.0"
   },
   "devEngines": {
     "runtime": {

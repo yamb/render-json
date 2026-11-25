@@ -294,6 +294,23 @@ test('JSON Feed preserves native abort reasons and rejects unsafe prepared cover
   });
 });
 
+test('JSON Feed accepts Temporal.Instant source dates and prepares JSON data', async () => {
+  const instant = Temporal.Instant.from('2026-11-01T23:30:00Z');
+  const source = { ...row(), createdAt: instant, updatedAt: instant, publishedAt: instant };
+
+  const prepare = (data) => {
+    assert.deepEqual(data, JSON.parse(JSON.stringify(source)));
+    return value();
+  };
+
+  for (const options of [{}, { prepare }]) {
+    const out = await feed({ ...config, ...options }).collection({ posts: [source] }, ctx);
+
+    assert.equal(out.items[0].date_published, '2026-11-01T23:30:00.000000000Z');
+    assert.equal(out.items[0].date_modified, '2026-11-01T23:30:00.000000000Z');
+  }
+});
+
 test('JSON Feed preserves opaque IDs through JSON serialization', async () => {
   const id = '\ud800';
   const out = await feed(config).collection({ posts: [{ ...row(), id }] }, ctx);

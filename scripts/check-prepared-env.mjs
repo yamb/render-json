@@ -9,9 +9,8 @@ if (!path) {
   throw new Error('YAMB_SQLITE_FIXTURE must point to an existing prepared database');
 }
 
-const inspector = new DatabaseSync(path, { readOnly: true });
-
-try {
+{
+  using inspector = new DatabaseSync(path, { readOnly: true });
   const count = inspector.prepare('SELECT count(*) AS n FROM posts').get().n;
 
   if (count !== 0) {
@@ -25,8 +24,6 @@ try {
       .all().length,
     rows: count
   });
-} finally {
-  inspector.close();
 }
 
 const sqliteStorage = sqlite({ path });
